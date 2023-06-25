@@ -1,59 +1,138 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import PostLists1 from "./PostLists1";
 import PostLists2 from "./PostLists2";
 import { useState } from "react";
 import Post from "./Post";
 import { CreateNewPost } from "./CreatePost";
 import PostListPaginated from "./PostListPaginated";
-
-const generateRandomString = (length) => {
-  const characters = "abcdefghijklmnopqrstuvwxyz";
-  let result = "";
-  const charactersLength = characters.length;
-  for (let i = 0; i < length; i++) {
-    result += characters.charAt(Math.floor(Math.random() * charactersLength));
-  }
-  return result;
-};
-
-const generateUUID = () => {
-  return `${generateRandomString(8)}-${generateRandomString(
-    4
-  )}-${generateRandomString(4)}-${generateRandomString(
-    4
-  )}-${generateRandomString(12)}`;
-};
+import Divider from "./components/divider";
 
 export default function App() {
-  const [currentPage, setCurrentPage] = useState(<PostLists1 />);
+  const [currentShow, setCurrentShow] = useState(<PostLists1 />);
+  const [postId, setPostId] = useState(1);
 
   return (
     <>
-      <div>
-        <button onClick={() => setCurrentPage(<PostLists1 />)}>
-          PostLists1
-        </button>
-        <button onClick={() => setCurrentPage(<PostLists2 />)}>
-          PostLists2
-        </button>
-        <button onClick={() => setCurrentPage(<Post id={1} />)}>Post 1</button>
-        <button
-          onClick={() =>
-            setCurrentPage(<CreateNewPost setCurrentPage={setCurrentPage} />)
-          }
-        >
-          Create Post
-        </button>
-
-        <button
-          onClick={() => {
-            setCurrentPage(<PostListPaginated />);
+      <div
+        style={{
+          display: "flex",
+          height: "100%",
+          gap: "1rem",
+          border: "1px solid red",
+        }}
+      >
+        <div
+          style={{
+            display: "flex",
+            borderRight: "1px solid #dedede",
+            flexDirection: "column",
+            justifyContent: "start",
+            alignItems: "center",
+            minWidth: "200px",
+            padding: "1rem",
+            gap: "1rem",
           }}
         >
-          PostListPaginated
-        </button>
+          <div onClick={() => setCurrentShow()}>
+            <h1
+              style={{
+                fontSize: "2rem",
+                fontFamily: "sans-serif",
+                color: "#333",
+              }}
+            >
+              React Query Demo
+            </h1>
+          </div>
+
+          <Divider />
+
+          <div>
+            <button
+              style={{
+                width: "150px",
+                zIndex: 1,
+                height: "50px",
+                fontSize: "1rem",
+              }}
+              onClick={() => setCurrentShow(<PostLists1 />)}
+            >
+              PostLists1
+            </button>
+          </div>
+
+          <Divider />
+
+          <div>
+            <button
+              style={{
+                width: "150px",
+                zIndex: 1,
+                height: "50px",
+                fontSize: "1rem",
+              }}
+              onClick={() => setCurrentShow(<PostLists2 />)}
+            >
+              PostLists2
+            </button>
+          </div>
+
+          <Divider />
+
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              width: "150px",
+            }}
+          >
+            <input
+              type="text"
+              placeholder="Post number"
+              onChange={(e) => setPostId(e.target.value)}
+              style={{
+                minWidth: "150px",
+                zIndex: 1,
+                height: "25px",
+                fontSize: "0.8rem",
+              }}
+            />
+            <p>There are a total of 30 posts.</p>
+            <button
+              style={{
+                width: "150px",
+                zIndex: 1,
+                height: "50px",
+                fontSize: "1rem",
+              }}
+              onClick={() => setCurrentShow(<Post id={postId} />)}
+            >
+              Post 1
+            </button>
+          </div>
+
+          <Divider />
+
+          <div>
+            <button
+              style={{
+                width: "150px",
+                zIndex: 1,
+                height: "50px",
+                fontSize: "1rem",
+              }}
+              onClick={() =>
+                setCurrentShow(
+                  <CreateNewPost setCurrentShow={setCurrentShow} />
+                )
+              }
+            >
+              Create Post
+            </button>
+          </div>
+        </div>
+        {currentShow}
       </div>
-      {currentPage}
     </>
   );
 }

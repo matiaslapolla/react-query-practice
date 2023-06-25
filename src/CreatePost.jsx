@@ -1,67 +1,51 @@
 import React, { useRef } from "react";
-import { createPost } from "./api/posts";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import {
+  QueryClient,
+  QueryClientProvider,
+  useMutation,
+} from "@tanstack/react-query";
+import { FakeApi } from "./fake-api/fake-api";
+import { dummyPosts } from "./fake-api/dummy-posts";
+import { generateUUID } from "./utils/generate-uuid";
 import Post from "./Post";
 
-export const CreateNewPost = ({ setCurrentPage }) => {
-  const titleRef = useRef();
+export const CreateNewPost = ({ setCurrentShow }) => {
+  const api = new FakeApi(dummyPosts);
   const bodyRef = useRef();
-  const queryClient = useQueryClient();
-  const createPostMutation = useMutation({
-    mutationFn: createPost,
-    onSuccess: (data) => {
-      queryClient.setQueryData(["posts", data.id], data);
-      queryClient.invalidateQueries(["posts"], { exact: true });
-      setCurrentPage(<Post id={data.id} />);
-    },
-    // onMutate: variable, // before mutationFn
-    // onSuccess: (data, variable, context), // then in promise
-    // onError: (error, variable, context), // catch in promise
-    // onSettled: (data, error, variable, context), // finally in promise
-  });
 
-  // createPostMutation.mutate(
-  //   {
-  //     title: titleRef.current.value,
-  //     body: bodyRef.current.value,
-  //   },
-  // options
-  //   {
-  //     onSuccess: (data) => {
-  //       console.log(data);
-  //     },
-  //     onError: (error) => {
-  //       console.log(error);
-  //     },
-  //     onSettled: (data, error) => {
-  //       console.log(data, error);
-  //     },
-  //     onMutate: (variable) => {
-  //       console.log(variable);
-  //     },
-  //   }
-  // );
+  const createPostMutation = useMutation({
+    //this variable parameter corresponds to line 46
+    mutationFn: (variable) => api.createPost(variable),
+    onSuccess: (data, variables, context) => {
+      console.log(data);
+      setCurrentShow(<Post id={data.post_id} />);
+    },
+    onError: (error, variables, context) => {},
+    onSettled: (data, error, variables, context) => {},
+    onMutate: (variables) => {},
+  });
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    createPostMutation.mutate({
-      title: titleRef.current.value,
-      body: bodyRef.current.value,
-    });
+    const body = bodyRef.current.value;
+    let post = {
+      post_id: 100,
+      user_id: 1,
+      post_content: body,
+      post_date: new Date().toISOString(),
+      likes: 0,
+    };
+
+    //refers to this parameter here
+    createPostMutation.mutate(post);
   };
 
   return (
     <>
       {createPostMutation.isLoading && <div>Loading...</div>}
-      {createPostMutation.isError && (
-        <div>Error: {JSON.stringify(createPostMutation.error)}</div>
-      )}
+      {createPostMutation.isError && <div>{}</div>}
       <div>CreateNewPost</div>
       <form onSubmit={handleSubmit}>
-        <div>
-          <label htmlFor="title">Title</label>
-          <input id="title" type="text" ref={titleRef} />
-        </div>
         <div>
           <label htmlFor="body">Body</label>
           <input id="body" type="text" ref={bodyRef} />

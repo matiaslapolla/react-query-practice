@@ -1,38 +1,39 @@
 import React from "react";
-import { getPost } from "./api/posts";
 import { useQuery } from "@tanstack/react-query";
-import { getUser } from "./api/users";
+import { FakeApi } from "./fake-api (unused)/fake-api";
+import { dummyPosts } from "./fake-api (unused)/dummy-posts";
 
 const Post = ({ id }) => {
-  const postQuery = useQuery({
+  const api = new FakeApi(dummyPosts);
+
+  const {
+    data: post,
+    isLoading,
+    isError,
+    error,
+  } = useQuery({
     queryKey: ["post", id],
-    queryFn: () => getPost(id),
+    queryFn: () => api.getPost(id),
   });
 
-  const userQuery = useQuery({
-    queryKey: ["user", postQuery?.data?.userId],
-    enabled: postQuery.data?.userId !== undefined,
-    queryFn: () => getUser(postQuery?.data?.userId),
-  });
-
-  if (postQuery.status === "loading") {
+  if (isLoading) {
     return <div>Loading...</div>;
   }
 
-  if (postQuery.status === "error") {
-    return <div>Error: {JSON.stringify(postQuery.error)}</div>;
+  if (isError) {
+    return <div>Error: {error.message}</div>;
   }
+
+  console.log(post);
 
   return (
     <>
-      {postQuery.data.title} <br />
-      {userQuery.isLoading ? (
-        <div>Loading...</div>
-      ) : userQuery.isError ? (
-        <div>Error: {JSON.stringify(userQuery.error)}</div>
-      ) : (
-        <div>{userQuery.data.name}</div>
-      )}
+      <div>
+        <h1>{post.post_id}</h1>
+        <h2>{post.post_content}</h2>
+        <h3>{post.post_date}</h3>
+        <p>Likes: {post.likes}</p>
+      </div>
     </>
   );
 };
